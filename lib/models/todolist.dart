@@ -22,10 +22,14 @@ class TodoList with ChangeNotifier {
     notifyListeners();
   }
 
-  void remove(Todo todo) => _todos.remove(todo);
+  void remove(Todo todo) {
+    _todos.remove(todo);
+    notifyListeners();
+  }
 
-  void completeTodo(int todoId) {
-    Todo todo = _todos[todoId];
+  void complete(Todo todo) {
+    var index = _todos.indexOf(todo);
+    todo = _todos[index];
     todo.complete();
     notifyListeners();
   }

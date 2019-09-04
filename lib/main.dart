@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:todo_provider/models/todo.dart';
 import 'package:todo_provider/theme.dart';
 
 import 'models/todolist.dart';
@@ -8,46 +10,50 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Todo List',
-      theme: appTheme,
-      home: MyHomePage(title: 'Todo List with Providers'),
+    return ChangeNotifierProvider(
+      builder: (context) => TodoList(),
+      child: MaterialApp(
+        title: 'Todo List',
+        theme: appTheme,
+        home: MyHomePage(),
+      ),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
 
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  final todoList = TodoList();
+class MyHomePage extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+    final todoList = Provider.of<TodoList>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        actions: <Widget>[
+          // Counter(),
+          Consumer<TodoList>(
+            builder: (context, todoList, child) => Text(
+              "${todoList.length}",
+              style: Theme.of(context).textTheme.display1)
+          )
+        ],
+        title: Text("Todo List with Provider"),
       ),
       body: ListView.builder(
         itemCount: todoList.length,
         itemBuilder: (context, index) {
           var todo = todoList[index];
           return Dismissible(
+            direction: DismissDirection.endToStart,
             key: Key(todo.description),
             onDismissed: (direction) {
               if (direction == DismissDirection.endToStart){
-                setState(() {
-                  todoList.remove(todo);
-                });
+                todoList.remove(todo);
+                print(todoList.length);
                 Scaffold.of(context).showSnackBar(
                     SnackBar(content: Text("${todo.description} apagada")));
               } else if (direction == DismissDirection.startToEnd) {
+                todoList.complete(todo);
                 Scaffold.of(context).showSnackBar(
                     SnackBar(content: Text("${todo.description} concluída")));
               }
